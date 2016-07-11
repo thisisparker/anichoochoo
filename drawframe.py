@@ -104,10 +104,8 @@ def place_engine(canvas,x,y):
     canvas.paste(choochoo,(x,y),choochoo)
 
 def place_car(canvas,x,y):
-    if random.choice(["red","green"]) == "red":
-        car = redcar
-    else:
-        car = greencar
+    cars = [redcar,greencar]
+    car = random.choice(cars)
     canvas.paste(car,(x,y),car)
 
 def place_scenery(canvas,y):
@@ -116,7 +114,7 @@ def place_scenery(canvas,y):
         if random.randint(1,10) == 1:
             thing = random.choice([cactus,cactus,palm,palm,horse,turtle])
             canvas.paste(thing,(x,y),thing)
-        x = x + BLOCK_SIDE
+        x += BLOCK_SIDE
 
 if __name__ == "__main__":
     main()
