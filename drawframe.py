@@ -2,11 +2,12 @@
 # For now, render a single frame of a @choochoobot drawing onto a canvas.
 # More to come.
 
-from PIL import Image
 import errno
-import os
-import random
 from math import ceil
+import random
+import os
+
+from PIL import Image
 
 SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 576
