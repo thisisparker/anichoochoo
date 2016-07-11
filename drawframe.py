@@ -3,6 +3,8 @@
 # More to come.
 
 from PIL import Image
+import errno
+import os
 import random
 from math import ceil
 
@@ -14,6 +16,7 @@ BLOCK_SIDE = int(SCREEN_HEIGHT/NUMROWS)
 BLOCK_SIZE = (BLOCK_SIDE,BLOCK_SIDE)
 ROWS = [BLOCK_SIDE * x for x in range(NUMROWS)]
 FRAME_COUNT = 160
+OUTPUT_DIR = 'slides'
 
 choochoo = Image.open("images/choochoo.png").resize(BLOCK_SIZE)
 redcar = Image.open("images/redcar.png").resize(BLOCK_SIZE)
@@ -27,6 +30,13 @@ moon = Image.open("images/moon.png").resize(BLOCK_SIZE)
 blank = Image.new("RGBA",BLOCK_SIZE,(0,0,0,0))
 
 def main():
+
+    # Create the output directory if it doesn't already exist
+    try:
+        os.makedirs(OUTPUT_DIR)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
 
     # "static" holds the elements that do not change throughout the animation.
     # That includes the train and its cars.
@@ -92,7 +102,7 @@ def main():
 
         render.paste(scenery,(-offset,0),scenery)
         
-        new_filename = "slides/img" + format(frame_number,"04d") + ".png"
+        new_filename = OUTPUT_DIR + "/img" + format(frame_number,"04d") + ".png"
         print("rendering frame " + str(frame_number) + " as " + new_filename)
         render.save(new_filename)
 
