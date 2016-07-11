@@ -72,7 +72,8 @@ def main():
 
         render = Image.new('RGBA',SCREEN_SIZE,bgcolor)
 
-        render.paste(static,(0,0),static)
+        bounce = random.randint(-4,4)
+        render.paste(static,(0,bounce),static)
 
         render.paste(sky_row,(-sky_offset,0),sky_row)
         if frame_number in minutes:
