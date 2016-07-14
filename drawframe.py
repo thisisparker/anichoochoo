@@ -96,9 +96,13 @@ def main():
         for row in BG_ROWS:
             if row.offset <= 0:
                 row.img = row.img.crop((0, 0, SCREEN_WIDTH, BLOCK_SIDE))
-                new_row = Image.new('RGBA', (SCREEN_WIDTH, BLOCK_SIDE), (0, 0, 0, 0))
+                new_row = Image.new('RGBA',
+                                    (SCREEN_WIDTH, BLOCK_SIDE),
+                                    (0, 0, 0, 0))
                 place_scenery(new_row, 0)
-                combined_row = Image.new('RGBA', (2 * SCREEN_WIDTH, BLOCK_SIDE), (0, 0, 0, 0))
+                combined_row = Image.new('RGBA',
+                                         (2 * SCREEN_WIDTH, BLOCK_SIDE),
+                                         (0, 0, 0, 0))
                 combined_row.paste(new_row, (0, 0), new_row)
                 combined_row.paste(row.img, (SCREEN_WIDTH, 0), row.img)
                 row.img = combined_row
@@ -137,7 +141,9 @@ def place_scenery(canvas, y):
 class Background_row:
     def __init__(self, yvalue, parallax):
         self.y = yvalue
-        self.img = Image.new('RGBA', (2 * SCREEN_WIDTH, BLOCK_SIDE), (0, 0, 0, 0))
+        self.img = Image.new('RGBA',
+                             (2 * SCREEN_WIDTH, BLOCK_SIDE),
+                             (0, 0, 0, 0))
         place_scenery(self.img, 0)
         self.offset = SCREEN_WIDTH
         self.parallax = parallax
