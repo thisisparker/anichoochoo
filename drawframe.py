@@ -108,8 +108,8 @@ def main():
 
             row.offset = int(row.offset - BLOCK_SIDE * row.parallax)
 
-        new_filename = OUTPUT_DIR + "/img" + format(frame_number, "04d") + ".png"
-        print("rendering frame " + str(frame_number) + " as " + new_filename)
+        new_filename = os.path.join(OUTPUT_DIR, "img%04d.png" % frame_number)
+        print("rendering frame %d as %s" % (frame_number, new_filename))
         render.save(new_filename)
 
         frame_number += 1
