@@ -68,7 +68,8 @@ def main():
 
     sky_offset = SCREEN_WIDTH
 
-    # Start with one frame full of scenery, and set the offset to zero. It'll create more along the way.
+    # Create row objects for each of the rows in the background.
+    # The class starts with an image and takes a parallax factor.
 
     row1 = Background_row(ROW_YS[1],.2)
     row2 = Background_row(ROW_YS[2],.4)
@@ -105,7 +106,7 @@ def main():
 
             render.paste(row.img,(-row.offset,row.y),row.img)
 
-            row.offset -= int(BLOCK_SIDE * row.parallax)
+            row.offset = int(row.offset - BLOCK_SIDE * row.parallax)
         
         new_filename = OUTPUT_DIR + "/img" + format(frame_number,"04d") + ".png"
         print("rendering frame " + str(frame_number) + " as " + new_filename)
