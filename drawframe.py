@@ -3,7 +3,6 @@
 # More to come.
 
 import errno
-from math import ceil
 import random
 import os
 
