@@ -2,7 +2,6 @@
 # For now, render a single frame of a @choochoobot drawing onto a canvas.
 # More to come.
 
-import errno
 import random
 import os
 
@@ -33,11 +32,7 @@ blank = Image.new("RGBA", BLOCK_SIZE, (0, 0, 0, 0))
 def main():
 
     # Create the output directory if it doesn't already exist
-    try:
-        os.makedirs(OUTPUT_DIR)
-    except OSError as exception:
-        if exception.errno != errno.EEXIST:
-            raise
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     # "static" holds the elements that do not change throughout the animation.
     # That includes the train and its cars.
