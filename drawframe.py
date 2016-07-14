@@ -72,15 +72,15 @@ def main():
     # The class starts with an image and takes a parallax factor.
 
     row1 = Background_row(ROW_YS[1],.2)
-    row2 = Background_row(ROW_YS[2],.4)
-    row4 = Background_row(ROW_YS[4],.6)
-    row5 = Background_row(ROW_YS[5],.8)
+    row2 = Background_row(ROW_YS[2],.3)
+    row4 = Background_row(ROW_YS[4],.4)
+    row5 = Background_row(ROW_YS[5],.6)
 
     BG_ROWS = [row1,row2,row4,row5]
 
     frame_number = 0
 
-    while frame_number <= FRAME_COUNT:
+    for frame_number in range(1,FRAME_COUNT+1):
 
         bgcolor = (255,255,255)
 
@@ -95,7 +95,7 @@ def main():
 
         for row in BG_ROWS:
             if row.offset <= 0:
-                row.img = row.img.crop((0,0,SCREEN_WIDTH,SCREEN_HEIGHT))
+                row.img = row.img.crop((0,0,SCREEN_WIDTH,BLOCK_SIDE))
                 new_row = Image.new('RGBA',(SCREEN_WIDTH,BLOCK_SIDE),(0,0,0,0))
                 place_scenery(new_row,0)
                 combined_row = Image.new('RGBA',(2 * SCREEN_WIDTH,BLOCK_SIDE),(0,0,0,0))
