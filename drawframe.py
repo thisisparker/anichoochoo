@@ -111,8 +111,6 @@ def main():
         print("rendering frame %d as %s" % (frame_number, new_filename))
         render.save(new_filename)
 
-        frame_number += 1
-
 
 def place_engine(canvas, x, y):
     canvas.paste(choochoo, (x, y), choochoo)
