@@ -15,8 +15,8 @@ SCREEN_SIZE = (SCREEN_WIDTH,SCREEN_HEIGHT)
 NUMROWS = 6
 BLOCK_SIDE = int(SCREEN_HEIGHT/NUMROWS)
 BLOCK_SIZE = (BLOCK_SIDE,BLOCK_SIDE)
-ROWS = [BLOCK_SIDE * x for x in range(NUMROWS)]
-FRAME_COUNT = 160
+ROW_YS = [BLOCK_SIDE * x for x in range(NUMROWS)]
+FRAME_COUNT = 1080
 OUTPUT_DIR = 'slides'
 
 choochoo = Image.open("images/choochoo.png").resize(BLOCK_SIZE)
@@ -37,7 +37,7 @@ def main():
         os.makedirs(OUTPUT_DIR)
     except OSError as exception:
         if exception.errno != errno.EEXIST:
-            raise
+            raise    
 
     # "static" holds the elements that do not change throughout the animation.
     # That includes the train and its cars.
@@ -45,7 +45,7 @@ def main():
     static = Image.new('RGBA',SCREEN_SIZE,(0,0,0,0))
 
     choochx = int(BLOCK_SIDE * 6)
-    choochy = ROWS[3]
+    choochy = ROW_YS[3]
     place_engine(static,choochx,choochy)
 
     train_length = 7
@@ -70,10 +70,12 @@ def main():
 
     # Start with one frame full of scenery, and set the offset to zero. It'll create more along the way.
 
-    scenery = Image.new('RGBA',SCREEN_SIZE,(0,0,0,0))
-    for row in [ROWS[1],ROWS[2],ROWS[4],ROWS[5]]:
-        place_scenery(scenery,row)
-    offset = 0
+    row1 = Background_row(ROW_YS[1],.2)
+    row2 = Background_row(ROW_YS[2],.4)
+    row4 = Background_row(ROW_YS[4],.6)
+    row5 = Background_row(ROW_YS[5],.8)
+
+    BG_ROWS = [row1,row2,row4,row5]
 
     frame_number = 0
 
@@ -90,24 +92,25 @@ def main():
         if frame_number in minutes:
             sky_offset -= BLOCK_SIDE
 
-        if offset == 0:
-            scenery = scenery.crop((0,0,SCREEN_WIDTH,SCREEN_HEIGHT))
-            new_scene = Image.new('RGBA',SCREEN_SIZE,(0,0,0,0))
-            for row in [ROWS[1],ROWS[2],ROWS[4],ROWS[5]]:
-                place_scenery(new_scene,row)
-            combined_scene = Image.new('RGBA',(2 * SCREEN_WIDTH,SCREEN_HEIGHT),(0,0,0,0))
-            combined_scene.paste(new_scene,(0,0),new_scene)
-            combined_scene.paste(scenery,(SCREEN_WIDTH,0),scenery)
-            scenery = combined_scene
-            offset = SCREEN_WIDTH
+        for row in BG_ROWS:
+            if row.offset <= 0:
+                row.img = row.img.crop((0,0,SCREEN_WIDTH,SCREEN_HEIGHT))
+                new_row = Image.new('RGBA',(SCREEN_WIDTH,BLOCK_SIDE),(0,0,0,0))
+                place_scenery(new_row,0)
+                combined_row = Image.new('RGBA',(2 * SCREEN_WIDTH,BLOCK_SIDE),(0,0,0,0))
+                combined_row.paste(new_row,(0,0),new_row)
+                combined_row.paste(row.img,(SCREEN_WIDTH,0),row.img)
+                row.img = combined_row
+                row.offset = SCREEN_WIDTH
 
-        render.paste(scenery,(-offset,0),scenery)
+            render.paste(row.img,(-row.offset,row.y),row.img)
+
+            row.offset -= int(BLOCK_SIDE * row.parallax)
         
         new_filename = OUTPUT_DIR + "/img" + format(frame_number,"04d") + ".png"
         print("rendering frame " + str(frame_number) + " as " + new_filename)
         render.save(new_filename)
 
-        offset -= BLOCK_SIDE
         frame_number += 1
 
 
@@ -126,6 +129,14 @@ def place_scenery(canvas,y):
             thing = random.choice([cactus,cactus,palm,palm,horse,turtle])
             canvas.paste(thing,(x,y),thing)
         x += BLOCK_SIDE
+
+class Background_row:
+    def __init__(self, yvalue,parallax):
+        self.y = yvalue
+        self.img = Image.new('RGBA',(2 * SCREEN_WIDTH,BLOCK_SIDE),(0,0,0,0))
+        place_scenery(self.img,0)
+        self.offset = SCREEN_WIDTH
+        self.parallax = parallax
 
 if __name__ == "__main__":
     main()
