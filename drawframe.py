@@ -26,15 +26,71 @@ def load_block_image(name):
 def load_all_block_images(names):
     return [load_block_image(name) for name in names]
 
-choochoo = load_block_image("choochoo.png")
-cars = load_all_block_images(["redcar.png", "greencar.png"])
 things = load_all_block_images(["cactus.png", "cactus.png",
                                 "palm.png", "palm.png",
                                 "horse.png",
                                 "turtle.png"])
-sun = load_block_image("sun.png")
-moon = load_block_image("moon.png")
 blank = Image.new("RGBA", BLOCK_SIZE, (0, 0, 0, 0))
+
+
+class Drawable:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+
+class Sprite(Drawable):
+    def __init__(self, x, y, image):
+        super(Sprite, self).__init__(x, y)
+        if isinstance(image, str):
+            self.image = load_block_image(image)
+        else:
+            self.image = image
+
+    def draw(self, canvas):
+        canvas.paste(self.image, (self.x, self.y), self.image)
+
+
+class Engine(Sprite):
+    def __init__(self, x, y):
+        super(Engine, self).__init__(x, y, "choochoo.png")
+
+
+class Car(Sprite):
+    cars = load_all_block_images(["redcar.png", "greencar.png"])
+
+    def __init__(self, x, y):
+        super(Car, self).__init__(x, y, random.choice(self.cars))
+
+
+class Sun(Sprite):
+    def __init__(self, x, y):
+        super(Sun, self).__init__(x, y, "sun.png")
+
+
+class Moon(Sprite):
+    def __init__(self, x, y):
+        super(Moon, self).__init__(x, y, "moon.png")
+
+
+def place_scenery(canvas, y):
+    x = 0
+    for block in range(int(canvas.width)):
+        if random.randint(1, 10) == 1:
+            thing = random.choice(things)
+            canvas.paste(thing, (x, y), thing)
+        x += BLOCK_SIDE
+
+
+class Background_row:
+    def __init__(self, yvalue, parallax):
+        self.y = yvalue
+        self.img = Image.new('RGBA',
+                             (2 * SCREEN_WIDTH, BLOCK_SIDE),
+                             (0, 0, 0, 0))
+        place_scenery(self.img, 0)
+        self.offset = SCREEN_WIDTH
+        self.parallax = parallax
 
 
 def main():
@@ -48,21 +104,18 @@ def main():
 
     choochx = int(BLOCK_SIDE * 6)
     choochy = ROW_YS[3]
-    place_engine(static, choochx, choochy)
+    Engine(choochx, choochy).draw(static)
 
     train_length = 7
 
-    carx = choochx
-
     for car in range(train_length):
-        carx = carx + BLOCK_SIDE
-        place_car(static, carx, choochy)
+        Car(choochx + (car + 1) * BLOCK_SIDE, choochy).draw(static)
 
     # "sky_row" is a long strip that has one sun and moon, advancing slowly.
 
     sky_row = Image.new('RGBA', (2 * SCREEN_WIDTH, BLOCK_SIDE), (0, 0, 0, 0))
-    sky_row.paste(sun, (SCREEN_WIDTH, 0), sun)
-    sky_row.paste(moon, (0, 0), moon)
+    Sun(SCREEN_WIDTH, 0).draw(sky_row)
+    Moon(0, 0).draw(sky_row)
 
     # Each item in the "minutes" list is a frame on which the sky_row advances.
 
@@ -117,35 +170,6 @@ def main():
         new_filename = os.path.join(OUTPUT_DIR, "img%04d.png" % frame_number)
         print("rendering frame %d as %s" % (frame_number, new_filename))
         render.save(new_filename)
-
-
-def place_engine(canvas, x, y):
-    canvas.paste(choochoo, (x, y), choochoo)
-
-
-def place_car(canvas, x, y):
-    car = random.choice(cars)
-    canvas.paste(car, (x, y), car)
-
-
-def place_scenery(canvas, y):
-    x = 0
-    for block in range(int(canvas.width)):
-        if random.randint(1, 10) == 1:
-            thing = random.choice(things)
-            canvas.paste(thing, (x, y), thing)
-        x += BLOCK_SIDE
-
-
-class Background_row:
-    def __init__(self, yvalue, parallax):
-        self.y = yvalue
-        self.img = Image.new('RGBA',
-                             (2 * SCREEN_WIDTH, BLOCK_SIDE),
-                             (0, 0, 0, 0))
-        place_scenery(self.img, 0)
-        self.offset = SCREEN_WIDTH
-        self.parallax = parallax
 
 if __name__ == "__main__":
     main()
