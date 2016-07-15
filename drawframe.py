@@ -17,6 +17,8 @@ ROW_YS = range(0, SCREEN_HEIGHT, BLOCK_SIDE)
 FRAME_COUNT = 1080
 OUTPUT_DIR = 'slides'
 IMAGE_DIR = 'images'
+BGCOLOR = (255, 255, 255)
+TRAIN_LENGTH = 7
 
 
 def load_block_image(name):
@@ -25,12 +27,6 @@ def load_block_image(name):
 
 def load_all_block_images(names):
     return [load_block_image(name) for name in names]
-
-things = load_all_block_images(["cactus.png", "cactus.png",
-                                "palm.png", "palm.png",
-                                "horse.png",
-                                "turtle.png"])
-blank = Image.new("RGBA", BLOCK_SIZE, (0, 0, 0, 0))
 
 
 class Drawable:
@@ -73,22 +69,46 @@ class Moon(Sprite):
         super(Moon, self).__init__(x, y, "moon.png")
 
 
-def place_scenery(canvas, y):
-    for x in range(0, canvas.width, BLOCK_SIDE):
-        if random.randint(1, 10) == 1:
-            thing = random.choice(things)
-            canvas.paste(thing, (x, y), thing)
+class BackgroundRow(Drawable):
+    things = load_all_block_images(["cactus.png", "cactus.png",
+                                    "palm.png", "palm.png",
+                                    "horse.png",
+                                    "turtle.png"])
 
-
-class Background_row:
-    def __init__(self, yvalue, parallax):
-        self.y = yvalue
+    def __init__(self, y, parallax):
+        super(BackgroundRow, self).__init__(-SCREEN_WIDTH, y)
         self.img = Image.new('RGBA',
                              (2 * SCREEN_WIDTH, BLOCK_SIDE),
                              (0, 0, 0, 0))
-        place_scenery(self.img, 0)
-        self.offset = SCREEN_WIDTH
+        self.place_scenery(self.img, 0)
         self.parallax = parallax
+
+    @classmethod
+    def place_scenery(self, canvas, y):
+        for x in range(0, canvas.width, BLOCK_SIDE):
+            if random.randint(1, 10) == 1:
+                thing = random.choice(self.things)
+                canvas.paste(thing, (x, y), thing)
+
+    def move_right(self):
+        self.x += BLOCK_SIDE * self.parallax
+
+        if self.x >= 0:
+            self.img = self.img.crop((0, 0, SCREEN_WIDTH, BLOCK_SIDE))
+            new_row = Image.new('RGBA',
+                                (SCREEN_WIDTH, BLOCK_SIDE),
+                                (0, 0, 0, 0))
+            self.place_scenery(new_row, 0)
+            combined_row = Image.new('RGBA',
+                                     (2 * SCREEN_WIDTH, BLOCK_SIDE),
+                                     (0, 0, 0, 0))
+            combined_row.paste(new_row, (0, 0), new_row)
+            combined_row.paste(self.img, (SCREEN_WIDTH, 0), self.img)
+            self.img = combined_row
+            self.x -= SCREEN_WIDTH
+
+    def draw(self, canvas):
+        canvas.paste(self.img, (int(self.x), self.y), self.img)
 
 
 def main():
@@ -97,20 +117,14 @@ def main():
 
     # "static" holds the elements that do not change throughout the animation.
     # That includes the train and its cars.
-
     static = Image.new('RGBA', SCREEN_SIZE, (0, 0, 0, 0))
-
     choochx = BLOCK_SIDE * 6
     choochy = ROW_YS[3]
     Engine(choochx, choochy).draw(static)
-
-    train_length = 7
-
-    for car in range(train_length):
+    for car in range(TRAIN_LENGTH):
         Car(choochx + (car + 1) * BLOCK_SIDE, choochy).draw(static)
 
     # "sky_row" is a long strip that has one sun and moon, advancing slowly.
-
     sky_row = Image.new('RGBA', (2 * SCREEN_WIDTH, BLOCK_SIDE), (0, 0, 0, 0))
     Sun(SCREEN_WIDTH, 0).draw(sky_row)
     Moon(0, 0).draw(sky_row)
@@ -118,51 +132,27 @@ def main():
     # Each item in the "minutes" list is a frame on which the sky_row advances.
     minutes = range(FRAME_COUNT // 40, FRAME_COUNT, FRAME_COUNT // 40)
 
-    sky_offset = SCREEN_WIDTH
-
     # Create row objects for each of the rows in the background.
     # The class starts with an image and takes a parallax factor.
+    bg_rows = [
+        BackgroundRow(ROW_YS[1], 0.2),
+        BackgroundRow(ROW_YS[2], 0.3),
+        BackgroundRow(ROW_YS[4], 0.4),
+        BackgroundRow(ROW_YS[5], 0.6),
+    ]
 
-    row1 = Background_row(ROW_YS[1], 0.2)
-    row2 = Background_row(ROW_YS[2], 0.3)
-    row4 = Background_row(ROW_YS[4], 0.4)
-    row5 = Background_row(ROW_YS[5], 0.6)
-
-    BG_ROWS = [row1, row2, row4, row5]
-
-    frame_number = 0
-
+    sky_offset = SCREEN_WIDTH
     for frame_number in range(1, FRAME_COUNT + 1):
-
-        bgcolor = (255, 255, 255)
-
-        render = Image.new('RGBA', SCREEN_SIZE, bgcolor)
-
+        render = Image.new('RGBA', SCREEN_SIZE, BGCOLOR)
         bounce = random.randint(-4, 4)
         render.paste(static, (0, bounce), static)
-
         render.paste(sky_row, (-sky_offset, 0), sky_row)
         if frame_number in minutes:
             sky_offset -= BLOCK_SIDE
 
-        for row in BG_ROWS:
-            if row.offset <= 0:
-                row.img = row.img.crop((0, 0, SCREEN_WIDTH, BLOCK_SIDE))
-                new_row = Image.new('RGBA',
-                                    (SCREEN_WIDTH, BLOCK_SIDE),
-                                    (0, 0, 0, 0))
-                place_scenery(new_row, 0)
-                combined_row = Image.new('RGBA',
-                                         (2 * SCREEN_WIDTH, BLOCK_SIDE),
-                                         (0, 0, 0, 0))
-                combined_row.paste(new_row, (0, 0), new_row)
-                combined_row.paste(row.img, (SCREEN_WIDTH, 0), row.img)
-                row.img = combined_row
-                row.offset = SCREEN_WIDTH
-
-            render.paste(row.img, (int(-row.offset), row.y), row.img)
-
-            row.offset = row.offset - BLOCK_SIDE * row.parallax
+        for row in bg_rows:
+            row.draw(render)
+            row.move_right()
 
         new_filename = os.path.join(OUTPUT_DIR, "img%04d.png" % frame_number)
         print("rendering frame %d as %s" % (frame_number, new_filename))
