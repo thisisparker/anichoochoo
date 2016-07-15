@@ -11,9 +11,9 @@ SCREEN_WIDTH = 1920
 SCREEN_HEIGHT = 576
 SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
 NUMROWS = 6
-BLOCK_SIDE = int(SCREEN_HEIGHT / NUMROWS)
+BLOCK_SIDE = SCREEN_HEIGHT // NUMROWS
 BLOCK_SIZE = (BLOCK_SIDE, BLOCK_SIDE)
-ROW_YS = [BLOCK_SIDE * x for x in range(NUMROWS)]
+ROW_YS = range(0, SCREEN_HEIGHT, BLOCK_SIDE)
 FRAME_COUNT = 1080
 OUTPUT_DIR = 'slides'
 IMAGE_DIR = 'images'
@@ -74,12 +74,10 @@ class Moon(Sprite):
 
 
 def place_scenery(canvas, y):
-    x = 0
-    for block in range(int(canvas.width)):
+    for x in range(0, canvas.width, BLOCK_SIDE):
         if random.randint(1, 10) == 1:
             thing = random.choice(things)
             canvas.paste(thing, (x, y), thing)
-        x += BLOCK_SIDE
 
 
 class Background_row:
@@ -102,7 +100,7 @@ def main():
 
     static = Image.new('RGBA', SCREEN_SIZE, (0, 0, 0, 0))
 
-    choochx = int(BLOCK_SIDE * 6)
+    choochx = BLOCK_SIDE * 6
     choochy = ROW_YS[3]
     Engine(choochx, choochy).draw(static)
 
@@ -118,8 +116,7 @@ def main():
     Moon(0, 0).draw(sky_row)
 
     # Each item in the "minutes" list is a frame on which the sky_row advances.
-
-    minutes = [int(FRAME_COUNT / 40 * _) for _ in range(1, 40)]
+    minutes = range(FRAME_COUNT // 40, FRAME_COUNT, FRAME_COUNT // 40)
 
     sky_offset = SCREEN_WIDTH
 
@@ -163,9 +160,9 @@ def main():
                 row.img = combined_row
                 row.offset = SCREEN_WIDTH
 
-            render.paste(row.img, (-row.offset, row.y), row.img)
+            render.paste(row.img, (int(-row.offset), row.y), row.img)
 
-            row.offset = int(row.offset - BLOCK_SIDE * row.parallax)
+            row.offset = row.offset - BLOCK_SIDE * row.parallax
 
         new_filename = os.path.join(OUTPUT_DIR, "img%04d.png" % frame_number)
         print("rendering frame %d as %s" % (frame_number, new_filename))
