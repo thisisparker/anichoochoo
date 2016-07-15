@@ -16,21 +16,28 @@ BLOCK_SIZE = (BLOCK_SIDE, BLOCK_SIDE)
 ROW_YS = [BLOCK_SIDE * x for x in range(NUMROWS)]
 FRAME_COUNT = 1080
 OUTPUT_DIR = 'slides'
+IMAGE_DIR = 'images'
 
-choochoo = Image.open("images/choochoo.png").resize(BLOCK_SIZE)
-redcar = Image.open("images/redcar.png").resize(BLOCK_SIZE)
-greencar = Image.open("images/greencar.png").resize(BLOCK_SIZE)
-cactus = Image.open("images/cactus.png").resize(BLOCK_SIZE)
-palm = Image.open("images/palm.png").resize(BLOCK_SIZE)
-turtle = Image.open("images/turtle.png").resize(BLOCK_SIZE)
-horse = Image.open("images/horse.png").resize(BLOCK_SIZE)
-sun = Image.open("images/sun.png").resize(BLOCK_SIZE)
-moon = Image.open("images/moon.png").resize(BLOCK_SIZE)
+
+def load_block_image(name):
+    return Image.open(os.path.join(IMAGE_DIR, name)).resize(BLOCK_SIZE)
+
+
+def load_all_block_images(names):
+    return [load_block_image(name) for name in names]
+
+choochoo = load_block_image("choochoo.png")
+cars = load_all_block_images(["redcar.png", "greencar.png"])
+things = load_all_block_images(["cactus.png", "cactus.png",
+                                "palm.png", "palm.png",
+                                "horse.png",
+                                "turtle.png"])
+sun = load_block_image("sun.png")
+moon = load_block_image("moon.png")
 blank = Image.new("RGBA", BLOCK_SIZE, (0, 0, 0, 0))
 
 
 def main():
-
     # Create the output directory if it doesn't already exist
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -117,7 +124,6 @@ def place_engine(canvas, x, y):
 
 
 def place_car(canvas, x, y):
-    cars = [redcar, greencar]
     car = random.choice(cars)
     canvas.paste(car, (x, y), car)
 
@@ -126,7 +132,7 @@ def place_scenery(canvas, y):
     x = 0
     for block in range(int(canvas.width)):
         if random.randint(1, 10) == 1:
-            thing = random.choice([cactus, cactus, palm, palm, horse, turtle])
+            thing = random.choice(things)
             canvas.paste(thing, (x, y), thing)
         x += BLOCK_SIDE
 
